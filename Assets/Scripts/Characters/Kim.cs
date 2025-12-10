@@ -21,12 +21,14 @@ public class Kim : CharacterController
             Wheight = wheight;
         }
     }
+    List<Burger> burgers = new List<Burger>();
     public float pathfindCooldown = 0;
-
 
     public override void StartCharacter()
     {
         base.StartCharacter();
+
+        burgers = FindObjectsOfType<Burger>(true).ToList();
 
     }
 
@@ -34,11 +36,17 @@ public class Kim : CharacterController
     {
         base.UpdateCharacter();
 
-        Zombie closest = GetClosest(GetContextByTag("Zombie"))?.GetComponent<Zombie>();
+        Zombie closestZombie = GetClosest(GetContextByTag("Zombie"))?.GetComponent<Zombie>();
+        Burger closestBurger = GetClosest(GetContextByTag("Burger"))?.GetComponent<Burger>();
         pathfindCooldown -= Time.deltaTime;
 
         //Test
-        if ((myWalkBuffer.Count == 0 || closest !=null) && pathfindCooldown <= 0 )
+        if ((myWalkBuffer.Count == 0 || closestZombie != null) && pathfindCooldown <= 0 && burgers.Count < 0)
+        {
+            PathFind(myCurrentTile, Grid.Instance.TryGetTile(new Vector2Int((int)closestBurger.transform.position.x, (int)closestBurger.transform.position.y)));
+            pathfindCooldown = 0.5f;
+        }
+        else if ((myWalkBuffer.Count == 0 || closestZombie != null) && pathfindCooldown <= 0)
         {
             PathFind(myCurrentTile, Grid.Instance.GetFinishTile());
             pathfindCooldown = 0.5f;
