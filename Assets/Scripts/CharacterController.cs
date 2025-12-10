@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 
 public class CharacterController : MonoBehaviour
@@ -74,4 +75,5 @@ public class CharacterController : MonoBehaviour
         myWalkBuffer.Clear();
         myWalkBuffer.AddRange(someTiles);
     }
+
 }

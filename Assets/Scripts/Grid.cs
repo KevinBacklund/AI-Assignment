@@ -180,6 +180,7 @@ public class Grid : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+
         if (GeneratedGrid)
         {
             foreach (Tile t in tiles)

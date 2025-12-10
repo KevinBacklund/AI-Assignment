@@ -41,7 +41,7 @@ public class Kim : CharacterController
         if ((myWalkBuffer.Count == 0 || closest !=null) && pathfindCooldown <= 0 )
         {
             PathFind(myCurrentTile, Grid.Instance.GetFinishTile());
-            pathfindCooldown = 1;
+            pathfindCooldown = 0.5f;
         }
     }
 
@@ -115,7 +115,7 @@ public class Kim : CharacterController
                     wheight += distanceToStart;
                     if (closestZombie != null)
                     {
-                        wheight += Mathf.Max(0, 5 - Vector3.Distance(closestZombie.transform.position, Grid.Instance.WorldPos(neighbor)));
+                        wheight += Mathf.Max(0, 10 - Vector3.Distance(closestZombie.transform.position, Grid.Instance.WorldPos(neighbor)));
                     }
                     open.Add(new Node(neighbor, current, wheight));
                     openTiles.Add(neighbor);
@@ -134,5 +134,15 @@ public class Kim : CharacterController
         result.Add(Grid.Instance.TryGetTile(new Vector2Int(tile.x, tile.y - 1)));
 
         return result;
+    }
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        foreach (Grid.Tile tile in myWalkBuffer)
+        {
+            Vector3 cubePos = new Vector3();
+            cubePos = Grid.Instance.WorldPos(tile);
+            Gizmos.DrawCube(cubePos, Vector3.one * 0.5f);
+        }
     }
 }
