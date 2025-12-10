@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,17 @@ using UnityEngine;
 public class Kim : CharacterController
 {
     [SerializeField] float ContextRadius;
+
+    public class Node
+    {
+        Grid.Tile Tile;
+        Grid.Tile Parent;
+        public void node(Grid.Tile tile, Grid.Tile parent)
+        {
+            Tile = tile;
+            Parent = parent;
+        }
+    }
 
     public override void StartCharacter()
     {
@@ -52,5 +64,18 @@ public class Kim : CharacterController
             }
         }
         return Closest;
+    }
+    private void PathFind(Grid.Tile goal, Grid.Tile start)
+    {
+        float estimatedDistance = Vector3.Distance(Grid.Instance.WorldPos(goal), Grid.Instance.WorldPos(start));
+        List<Grid.Tile> open = new List<Grid.Tile>();
+        open.Add(start);
+        HashSet<Node> closed = new HashSet<Node>();
+        while (open.Count > 0)
+        {
+            open.Sort();
+            Grid.Tile current = open[open.Count-1];
+            open.RemoveAt(open.Count-1);
+        }
     }
 }
