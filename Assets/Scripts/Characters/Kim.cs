@@ -22,13 +22,18 @@ public class Kim : CharacterController
         }
     }
     List<Burger> burgers = new List<Burger>();
-    public float pathfindCooldown = 0;
-
+    public List<Grid.Tile> burgerTiles = new List<Grid.Tile>();
+    private float pathfindCooldown = 0;
+    int targetBurger = 0;
     public override void StartCharacter()
     {
         base.StartCharacter();
 
         burgers = FindObjectsOfType<Burger>(true).ToList();
+        foreach (Burger burger in burgers)
+        {
+           burgerTiles.Add(Grid.Instance.GetClosest(burger.transform.position));
+        }
 
     }
 
@@ -36,21 +41,23 @@ public class Kim : CharacterController
     {
         base.UpdateCharacter();
 
-        Zombie closestZombie = GetClosest(GetContextByTag("Zombie"))?.GetComponent<Zombie>();
-        Burger closestBurger = GetClosest(GetContextByTag("Burger"))?.GetComponent<Burger>();
+        //Zombie closestZombie = GetClosest(GetContextByTag("Zombie"))?.GetComponent<Zombie>();
         pathfindCooldown -= Time.deltaTime;
+        targetBurger = GamesManager.Instance.GetCollectedBurgers;
+
 
         //Test
-        if ((myWalkBuffer.Count == 0 || closestZombie != null) && pathfindCooldown <= 0 && burgers.Count < 0)
+        /*
+        if ((myWalkBuffer.Count == 0 || closestZombie != null) && pathfindCooldown <= 0 && GamesManager.Instance.GetCollectedBurgers < burgers.Count)
         {
-            PathFind(myCurrentTile, Grid.Instance.TryGetTile(new Vector2Int((int)closestBurger.transform.position.x, (int)closestBurger.transform.position.y)));
-            pathfindCooldown = 0.5f;
+            PathFind(myCurrentTile, burgerTiles[targetBurger], closestZombie);
+            pathfindCooldown = 1;
         }
         else if ((myWalkBuffer.Count == 0 || closestZombie != null) && pathfindCooldown <= 0)
         {
-            PathFind(myCurrentTile, Grid.Instance.GetFinishTile());
-            pathfindCooldown = 0.5f;
-        }
+            PathFind(myCurrentTile, Grid.Instance.GetFinishTile(), closestZombie);
+            pathfindCooldown = 1;
+        }*/
     }
 
     Vector3 GetEndPoint()
@@ -58,7 +65,7 @@ public class Kim : CharacterController
         return Grid.Instance.WorldPos(Grid.Instance.GetFinishTile());
     }
 
-    GameObject[] GetContextByTag(string aTag)
+    public GameObject[] GetContextByTag(string aTag)
     {
         Collider[] context = Physics.OverlapSphere(transform.position, ContextRadius);
         List<GameObject> returnContext = new List<GameObject>();
@@ -72,7 +79,7 @@ public class Kim : CharacterController
         return returnContext.ToArray();
     }
 
-    GameObject GetClosest(GameObject[] aContext)
+    public GameObject GetClosest(GameObject[] aContext)
     {
         float dist = float.MaxValue;
         GameObject Closest = null;
@@ -87,9 +94,8 @@ public class Kim : CharacterController
         }
         return Closest;
     }
-    private void PathFind(Grid.Tile start, Grid.Tile goal)
+    public void PathFind(Grid.Tile start, Grid.Tile goal)
     {
-        float distanceToStart = 0;
         List<Node> open = new List<Node>();
         open.Add(new Node(start));
         List <Grid.Tile> openTiles = new List<Grid.Tile>();
@@ -101,7 +107,6 @@ public class Kim : CharacterController
             open.Sort((b,a) => (a.Wheight.CompareTo(b.Wheight)));
             Node current = open[open.Count-1];
             open.RemoveAt(open.Count-1);
-            distanceToStart += 1;
             if (current.Tile == goal)
             {
                 List<Grid.Tile> path = new List<Grid.Tile>();
@@ -119,13 +124,13 @@ public class Kim : CharacterController
             {
                 if (!openTiles.Contains(neighbor) && neighbor != null && !neighbor.occupied)
                 {
-                    float wheight = Vector3.Distance(Grid.Instance.WorldPos(goal), Grid.Instance.WorldPos(neighbor));
-                    wheight += distanceToStart;
+                    float cost = Vector3.Distance(Grid.Instance.WorldPos(goal), Grid.Instance.WorldPos(neighbor));
+                    cost += current.Wheight + Vector3.Distance(Grid.Instance.WorldPos(current.Tile), Grid.Instance.WorldPos(neighbor));
                     if (closestZombie != null)
                     {
-                        wheight += Mathf.Max(0, 10 - Vector3.Distance(closestZombie.transform.position, Grid.Instance.WorldPos(neighbor)));
+                        cost += Mathf.Max(0, 20 - 5*Vector3.Distance(closestZombie.transform.position, Grid.Instance.WorldPos(neighbor)));
                     }
-                    open.Add(new Node(neighbor, current, wheight));
+                    open.Add(new Node(neighbor, current, cost));
                     openTiles.Add(neighbor);
                 }
             }
@@ -136,12 +141,27 @@ public class Kim : CharacterController
     public List<Grid.Tile> FindNeighbors(Grid.Tile tile)
     {
         List<Grid.Tile> result = new List<Grid.Tile>();
-        result.Add(Grid.Instance.TryGetTile(new Vector2Int(tile.x + 1, tile.y)));
-        result.Add(Grid.Instance.TryGetTile(new Vector2Int(tile.x - 1, tile.y)));
-        result.Add(Grid.Instance.TryGetTile(new Vector2Int(tile.x, tile.y + 1)));
-        result.Add(Grid.Instance.TryGetTile(new Vector2Int(tile.x, tile.y - 1)));
-
+        for (int x = tile.x - 1; x < tile.x + 2; x++)
+        {
+            for (int y = tile.y - 1; y < tile.y + 2; y++)
+            {
+                if (y != 0 && x != 0)
+                {
+                    result.Add(Grid.Instance.TryGetTile(new Vector2Int(x, y)));
+                }
+            }
+        }
         return result;
+    }
+
+    public void ClearWalkBuffer()
+    {
+        myWalkBuffer.Clear();
+    }
+
+    public Grid.Tile GetCurrentTile()
+    {
+        return myCurrentTile;
     }
     private void OnDrawGizmos()
     {
