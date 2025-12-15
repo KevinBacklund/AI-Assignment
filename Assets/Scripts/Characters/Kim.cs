@@ -47,17 +47,17 @@ public class Kim : CharacterController
 
 
         //Test
-        /*
-        if ((myWalkBuffer.Count == 0 || closestZombie != null) && pathfindCooldown <= 0 && GamesManager.Instance.GetCollectedBurgers < burgers.Count)
+        
+        if (((myWalkBuffer.Count == 0) || pathfindCooldown <= 0) && GamesManager.Instance.GetCollectedBurgers < burgers.Count)
         {
-            PathFind(myCurrentTile, burgerTiles[targetBurger], closestZombie);
-            pathfindCooldown = 1;
+            PathFind(myCurrentTile, burgerTiles[targetBurger]);
+            pathfindCooldown = 0.5f;
         }
-        else if ((myWalkBuffer.Count == 0 || closestZombie != null) && pathfindCooldown <= 0)
+        else if ((myWalkBuffer.Count == 0) || pathfindCooldown <= 0)
         {
-            PathFind(myCurrentTile, Grid.Instance.GetFinishTile(), closestZombie);
-            pathfindCooldown = 1;
-        }*/
+            PathFind(myCurrentTile, Grid.Instance.GetFinishTile());
+            pathfindCooldown = 0.5f;
+        }
     }
 
     Vector3 GetEndPoint()
@@ -128,7 +128,7 @@ public class Kim : CharacterController
                     cost += current.Wheight + Vector3.Distance(Grid.Instance.WorldPos(current.Tile), Grid.Instance.WorldPos(neighbor));
                     if (closestZombie != null)
                     {
-                        cost += Mathf.Max(0, 20 - 5*Vector3.Distance(closestZombie.transform.position, Grid.Instance.WorldPos(neighbor)));
+                        cost += Mathf.Max(0, 40 - 10*Vector3.Distance(closestZombie.transform.position, Grid.Instance.WorldPos(neighbor)));
                     }
                     open.Add(new Node(neighbor, current, cost));
                     openTiles.Add(neighbor);
