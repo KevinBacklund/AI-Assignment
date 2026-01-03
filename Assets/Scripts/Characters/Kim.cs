@@ -30,7 +30,6 @@ public class Kim : CharacterController
         base.StartCharacter();
         KimBehaviourTree = GetComponent<KimBT>();
         KimBehaviourTree.kim = this;
-        KimBehaviourTree.StartTree();
         burgers = FindObjectsOfType<Burger>(true).ToList();
         foreach (Burger burger in burgers)
         {

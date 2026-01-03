@@ -9,10 +9,6 @@ public class KimBT : BehaviourTree
     [HideInInspector]
     public float waitTime = 0;
 
-    public Node StartTree()
-    {
-        return SetupTree();
-    }
     protected override Node SetupTree()
     {
         Node root = new Selector(new List<Node>
@@ -88,13 +84,14 @@ public class TaskAvoidZombie : Node
 
     public override NodeState Evaluate()
     {
+        float safeDistance = 2.5f;
         KimBT bt = myTree as KimBT;
         Zombie closestZombie = bt.kim.GetClosest(bt.kim.GetContextByTag("Zombie"))?.GetComponent<Zombie>();
         if (closestZombie == null)
         {
             return NodeState.Failure;
         }
-        else if (Vector3.Distance(closestZombie.transform.position, bt.kim.transform.position) < 2.5)
+        else if (Vector3.Distance(closestZombie.transform.position, bt.kim.transform.position) < safeDistance)
         {
             bt.kim.previewColor = Color.red;
             Grid.Tile awayTile = Grid.Instance.GetClosest(bt.kim.transform.position + (bt.kim.transform.position - closestZombie.transform.position).normalized);
