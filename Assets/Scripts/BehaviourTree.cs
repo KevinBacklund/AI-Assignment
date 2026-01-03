@@ -35,6 +35,11 @@ public class Node
     }
     public void SetData(string key, object data)
     {
+        if (Context.ContainsKey(key))
+        {
+            Context[key] = data;
+            return;
+        }
         Context.Add(key, data);
     }
     public object GetData(string key)
